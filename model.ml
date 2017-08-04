@@ -11,15 +11,23 @@ end
 
 
 module Binomial_tree : Model_int = struct
+  
+  
+
+  (* TO DELETE WHEN TEST ENDS!*)
+  let time1 = Time.of_filename_string "2017-08-04_13-19-00.000";;
+  let time2 = Time.of_filename_string "2017-08-05_13-19-00.000";;
+  let time3 = Time.of_filename_string "2017-08-06_13-19-00.000";;
 
   type t =
     | NODE of (Time.t * float) * t * t
     | EMPTY
 
+
   let make_test () =
-    let up = NODE ((Time.now (),120.0),EMPTY,EMPTY) in
-    let down = NODE ((Time.now (),90.0),EMPTY,EMPTY) in
-    NODE ((Time.now (),100.0),up,down)
+    let up = NODE ((time2,120.0),EMPTY,EMPTY) in
+    let down = NODE ((time2,90.0),EMPTY,EMPTY) in
+    NODE ((time1,100.0),up,down)
 
   let paths_of_model model =
     let rec aux current_list list_of_list = function
