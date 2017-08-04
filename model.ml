@@ -6,7 +6,7 @@ open Pricing_logic;;
 module type Model_intf = sig
   include Motion_intf
   include Pricing_logic_intf
-  val evaluate: parameter -> state -> t -> float
+  val evaluate: t -> parameter -> state -> float
 end
 
 module Make_model(Motion:Motion_intf) (Logic:Pricing_logic_intf):Model_intf = struct
@@ -15,6 +15,6 @@ module Make_model(Motion:Motion_intf) (Logic:Pricing_logic_intf):Model_intf = st
   include Logic
       
   
-  let evaluate parameter state logic = 42.0
+  let evaluate logic parameter state = 42.0
   
 end

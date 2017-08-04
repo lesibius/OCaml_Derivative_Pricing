@@ -60,7 +60,7 @@ let () =
   let () =
     match param, state with
     | None, _ | _, None -> failwith "You failed miserably"
-    | Some p, Some s ->  let value = M.evaluate p s logic in
+    | Some p, Some s ->  let value = M.evaluate logic p s in
       print_endline (string_of_float value) in
   ()
 (*module M = Make_model (Bachelier) (Binomial_tree);;*)
