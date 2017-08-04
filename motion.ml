@@ -5,7 +5,6 @@ open Core;;
 (*                    INTERFACES                      *)
 (******************************************************)
 
-
 module type Motion_intf = sig
 
   type parameter
