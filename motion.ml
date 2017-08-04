@@ -12,8 +12,10 @@ module type Motion_intf = sig
   type state
 
   val ds: parameter -> state -> float -> float -> float
-  val make_parameter: 'a -> parameter
-  val make_state: 'a -> state
+
+  (* THESE ONES SHOULD NOT BE USED!*)
+  val parameter_of_list: float list -> parameter option
+  val state_of_list: float list -> state option
 
 end
 
@@ -23,33 +25,30 @@ end
 (*                      BACHELIER                     *)
 (******************************************************)
 
-module type Bachelier_intf = sig
-
-  include Motion_intf
-  val make_parameter: float -> float -> float -> parameter
-  val make_state: float -> state
-  
-end
-
-
-module Bachelier : Bachelier_intf = struct
+module Bachelier : Motion_intf = struct
 
   type parameter =
     {
       mean:float;
       st_dev:float;
-      s0:float
     }
 
   type state = float
 
-  let make_parameter s0 mu sigma = {mean=mu;st_dev=sigma;s0=s0}
-  let make_state s = s
+  let parameter_of_list = function
+    | [] -> None
+    | h :: [] -> None
+    | mu :: sigma :: t -> Some {mean=mu;st_dev=sigma}
+        
+          
+  let state_of_list = function
+    | [] -> None
+    | h :: t -> Some h
 
   let ds param state dt dw =
     match param with
-    |{mean=mu;st_dev=sigma;s0=s0} ->
-      state *. mu *. dt +. s0 *. sigma *. dw *. (sqrt dt)
+    |{mean=mu;st_dev=sigma} ->
+      state *. mu *. dt +. sigma *. dw *. (sqrt dt)
     
 
 end
