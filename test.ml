@@ -1,6 +1,6 @@
 open Core;;
 open Payoff_function;;
-open Model;;
+open Pricing_logic;;
 
 let time1 = Time.of_filename_string "2017-08-04_13-19-00.000";;
 let time2 = Time.of_filename_string "2017-08-05_13-19-00.000";;
@@ -29,7 +29,7 @@ let () =
       (h |> Path.string_of_t) ^ " - call payooff = " ^ poff |> print_endline;
       aux t in
   let m = Binomial_tree.make_test () in
-  m |> Binomial_tree.paths_of_model |> aux;;
+  m |> Binomial_tree.paths_of_logic |> aux;;
 
 
 print_endline"\nTest Motion module";;
