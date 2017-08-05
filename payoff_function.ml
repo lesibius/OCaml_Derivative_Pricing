@@ -1,12 +1,13 @@
 open Core;;
 
 (*NB: barrier = test, unbreached payoff, breached payoff*)
-
 type t =
   | BASIC of (Path.t -> float)
   | CONSTANT of (unit -> float)
-  | BARRIER of (Path.t -> bool) * t * t;;
-  
+  | BARRIER of (Path.t -> bool) * t * t
+  | EUROPEAN_PUT of Time.t * float * t
+  | EUROPEAN_CALL of Time.t * float * t
+  | FORWARD of Time.t * float * t  
 
 let rec evaluate t path =
   match t with
@@ -17,6 +18,10 @@ let rec evaluate t path =
     else
       evaluate f_unbreached path
   | CONSTANT f -> f ()
+  (* Thereafter: payoffs of derivatives known for having closed form solution - this is used in pattern matching*)
+  | EUROPEAN_CALL (_,_,f) -> evaluate f path
+  | EUROPEAN_PUT (_,_,f) -> evaluate f path
+  | FORWARD (_,_,f) -> evaluate f path
 
 
 let call_payoff strike = function
@@ -29,6 +34,15 @@ let make_call expiry_date strike =
     expiry_date |>
     Path.get_val_by_date path
     |> call_payoff strike)
+
+
+let make_european_call expiry_date strike =
+  EUROPEAN_CALL (expiry_date, strike,
+    (BASIC
+    (fun path ->
+    expiry_date |>
+    Path.get_val_by_date path
+    |> call_payoff strike)))
 
 let knocked_out () =
   0.0

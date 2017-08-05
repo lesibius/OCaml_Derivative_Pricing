@@ -1,8 +1,14 @@
 open Core;;
+
 open Payoff_function;;
 open Pricing_logic;;
 open Model;;
 open Motion;;
+
+
+let () =
+  print_endline "Starting\n"
+
 
 let time1 = Time.of_filename_string "2017-08-04_13-19-00.000";;
 let time2 = Time.of_filename_string "2017-08-05_13-19-00.000";;
@@ -23,31 +29,36 @@ value of the barrier 2 = %f\n" (evaluate call path) (evaluate barrier path) (eva
 
 print_endline "\nSecond part: test Logic module"
 let () =
-  let call = make_call time2 100.0 in
-  let rec aux = function
-    | [] -> ()
-    | h :: t ->
-      let poff = (evaluate call h) |> string_of_float in
-      (h |> Path.string_of_t) ^ " - call payooff = " ^ poff |> print_endline;
-      aux t in
-  let m = Binomial_tree.make_test () in
-  m |> Binomial_tree.paths_of_logic |> aux;;
+  let p = Binomial_tree.make (BINOMIAL_TREE {start_date=time1;end_date = time3;depth = 12}) in
+  match p with
+  | None -> failwith "You failed miserably"
+  | Some p ->
+    Binomial_tree.string_of_t p |> print_endline;;
+
 
 
 print_endline"\nTest Motion module";;
 let () =
-  let bparam = Motion.Bachelier.parameter_of_list [0.01;0.15] in
-  let bstate = Motion.Bachelier.state_of_list [100.0] in
+  let bparam = Motion.Bachelier.make_parameter (P_BACHELIER {mean=0.01;st_dev=10.0}) in
+  let bstate = Motion.Bachelier.make_state (S_BACHELIER 100.0) in
   let () =
       match bparam,bstate with
       | None,_ |_,None -> print_endline "You failed miserably"
       | Some bparam, Some bstate ->
         let ds = Motion.Bachelier.ds bparam bstate 0.01 0.01 in
-        Std.printf "ds = %f\n" ds in
+        let call = make_european_call time2 100.0 in
+        let cprice_fun = Motion.Bachelier.get_closed_form call in
+        match cprice_fun with
+        | None -> failwith "You failed miserably"
+        | Some cp_fun ->
+          let cprice = cp_fun bparam bstate time3 in
+          Std.printf "ds = %f\n" ds;
+          Std.printf "call price = %f\n" cprice in
   ();;
 
 
 print_endline"\nTest Model module";;
+(*
 let () =
   let bachelier = (module Bachelier:Motion_intf) in
   let tree = (module Binomial_tree:Pricing_logic_intf) in
@@ -64,3 +75,5 @@ let () =
       print_endline (string_of_float value) in
   ()
 (*module M = Make_model (Bachelier) (Binomial_tree);;*)
+
+*)
