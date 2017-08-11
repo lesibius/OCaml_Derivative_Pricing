@@ -1,4 +1,5 @@
 open Core;;
+open Math_util;;
 
 
 type bachelier_parameter =
@@ -68,20 +69,10 @@ module Bachelier : Motion_intf = struct
     |{mean=mu;st_dev=sigma} ->
       state *. mu *. dt +. sigma *. dw *. (sqrt dt)
 
-  (*******************************************)
+  let d0 s0 sigma_bar strike rf deltat =
+    ((s0 *. exp (rf *. deltat) -. strike)) /. (s0 *. sigma_bar *. exp (rf *. deltat))
 
-  (*REPLACE THIS SHIT WHENEVER YOU CAN*)
-  let pi = 4.0 *. atan 1.0
-  let n0 z =
-    let a = 0.78766 in
-    let b = 0.2605 in
-    let c = 0.6827 in
-    let f = z *. a *. ((1.0 +. (z ** 2.0) *. (b ** 2.0)) ** c) in
-    (exp f) /. (exp f +. exp (-. f))
-
-  let d0 param state time_span =
-    match param with
-    | ({st_dev=sigma;_}:bachelier_parameter) -> sigma *. sqrt(time_span)
+  let n0 x = (1.0 +. erf (x /. sqrt 2.0)) /. 2.0
   
   let call_price expiry strike param (state:state) date0 =
     let open Payoff_function in
@@ -90,14 +81,16 @@ module Bachelier : Motion_intf = struct
       match state with
       | s0 ->
         let time_span = (Time.diff expiry date0 |> Span.to_day) /. 365.0 in
-        let dd0 = (d0 param state time_span |> n0) in
-        let a = (s0 -. strike) *. dd0 in
-        let b = s0 *. sigma /. sqrt (2.0 *. pi) *. exp ((-. dd0 ** 2.0) /. 2.0) in
-        (a +. b) *. exp (time_span *. mu)
+        let sigma_bar = sigma *. sqrt (time_span) /. s0 in
+        let dd0 = d0 s0 sigma_bar strike mu time_span in
+        let nn0 = dd0 |> n0 in
+        print_endline ("d0 = " ^ string_of_float dd0);
+        print_endline ("n0[d0] = " ^ string_of_float nn0);
+        print_endline ("sigma_bar = " ^ string_of_float sigma_bar);
+        let a = (s0 *. exp (time_span *. mu) -. strike) *. nn0 in
+        let b = s0 *. exp (time_span *. mu) *. sigma_bar /. (sqrt (2.0 *. pi)) *. exp ((-. dd0 ** 2.0) /. 2.0) in
+        (a +. b) *. exp (-. time_span *. mu)
         
-        
-
-
   
   let get_closed_form payoff =
     let open Payoff_function in

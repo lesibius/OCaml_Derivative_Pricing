@@ -1,4 +1,5 @@
 open Core;;
+open Printf;;
 
 open Payoff_function;;
 open Pricing_logic;;
@@ -10,9 +11,10 @@ let () =
   print_endline "Starting\n"
 
 
-let time1 = Time.of_filename_string "2017-08-04_13-19-00.000";;
-let time2 = Time.of_filename_string "2017-08-05_13-19-00.000";;
-let time3 = Time.of_filename_string "2017-08-06_13-19-00.000";;
+let time1 = Span.of_day 180.0 |> (Time.add (Time.now ()))
+let time2 = Span.of_day 180.0 |> (Time.add time1)
+let time3 = Span.of_day 180.0 |> (Time.add time2);;
+
 
 
 print_endline "First part: test payoffs"
@@ -39,19 +41,19 @@ let () =
 
 print_endline"\nTest Motion module";;
 let () =
-  let bparam = Motion.Bachelier.make_parameter (P_BACHELIER {mean=0.01;st_dev=10.0}) in
+  let bparam = Motion.Bachelier.make_parameter (P_BACHELIER {mean=0.00;st_dev=10.0}) in
   let bstate = Motion.Bachelier.make_state (S_BACHELIER 100.0) in
   let () =
       match bparam,bstate with
       | None,_ |_,None -> print_endline "You failed miserably"
       | Some bparam, Some bstate ->
         let ds = Motion.Bachelier.ds bparam bstate 0.01 0.01 in
-        let call = make_european_call time2 100.0 in
+        let call = make_european_call time2 110.0 in
         let cprice_fun = Motion.Bachelier.get_closed_form call in
         match cprice_fun with
         | None -> failwith "You failed miserably"
         | Some cp_fun ->
-          let cprice = cp_fun bparam bstate time3 in
+          let cprice = cp_fun bparam bstate time1 in
           Std.printf "ds = %f\n" ds;
           Std.printf "call price = %f\n" cprice in
   ();;
