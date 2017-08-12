@@ -1,6 +1,7 @@
 open Core;;
 
 
+
 type bachelier_parameter =
   {
     mean:float;
@@ -68,18 +69,23 @@ module Bachelier : Motion_intf = struct
     |{mean=mu;st_dev=sigma} ->
       state *. mu *. dt +. sigma *. dw *. (sqrt dt)
 
-  (*******************************************)
+  let d0 s0 sigma_bar strike rf deltat =
+    ((s0 *. exp (rf *. deltat) -. strike)) /. (s0 *. sigma_bar *. exp (rf *. deltat))
 
-  (*  external bachelier_call: float -> float -> float -> float -> float -> int = "caml_bachelier_call"*)
+
+  (*
+  let n0 x = (1.0 +. erf (x /. sqrt 2.0)) /. 2.0
+  *)
+
+  external bachelier_call: float -> float -> float -> float -> float -> int = "caml_bachelier_call"
     
+
   let call_price expiry strike param (state:state) date0 =
     match param with
     | ({mean=rf;st_dev=sigma}:parameter) ->
       let t = Time.diff expiry date0 |> Span.to_day in 
       match state with
-      | (s:float) -> s(*bachelier_call rf t s sigma strike*)
-  
-
+            | (s:float) -> s(*bachelier_call rf t s sigma strike*)
     
   let get_closed_form payoff =
     let open Payoff_function in

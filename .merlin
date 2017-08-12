@@ -1,3 +1,6 @@
 PKG core
 PKG ctypes
-B _build
+B _build/src
+B _build/test
+S src
+S test

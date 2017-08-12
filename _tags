@@ -1,1 +1,4 @@
 true:package(core,ctypes.foreign)
+<*.ml>:     annot
+<*.byte>:   linkdep(closedform.o),custom
+<*.native>: linkdep(closedform.o)
