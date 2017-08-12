@@ -81,15 +81,3 @@ let () =
 *)
 
 
-print_endline "Test Math module";;
-
-let () =
-  let test_val = 2.0 in
-  let test_val2 = 0.01 in
-  let test_val3 = -0.5 in
-  let test_val4 = 3.0 in
-  Std.printf "Pi = %f\n" Math_util.pi;
-  Std.printf "erf %f = %f\n" test_val (Math_util.erf test_val);
-  Std.printf "erf %f = %f\n" test_val2 (Math_util.erf test_val2);
-  Std.printf "erf %f = %f\n" test_val3 (Math_util.erf test_val3);
-    Std.printf "erf %f = %f\n" test_val4 (Math_util.erf test_val4)
