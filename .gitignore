@@ -22,3 +22,6 @@ setup.log
 # Linux/emacs tmp files:
 /#*#
 *~
+
+# C test file
+cstub_test
