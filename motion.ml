@@ -70,35 +70,17 @@ module Bachelier : Motion_intf = struct
 
   (*******************************************)
 
-  (*REPLACE THIS SHIT WHENEVER YOU CAN*)
-  let pi = 4.0 *. atan 1.0
-  let n0 z =
-    let a = 0.78766 in
-    let b = 0.2605 in
-    let c = 0.6827 in
-    let f = z *. a *. ((1.0 +. (z ** 2.0) *. (b ** 2.0)) ** c) in
-    (exp f) /. (exp f +. exp (-. f))
-
-  let d0 param state time_span =
-    match param with
-    | ({st_dev=sigma;_}:bachelier_parameter) -> sigma *. sqrt(time_span)
-  
+  (*  external bachelier_call: float -> float -> float -> float -> float -> int = "caml_bachelier_call"*)
+    
   let call_price expiry strike param (state:state) date0 =
-    let open Payoff_function in
     match param with
-    | ({mean=mu;st_dev=sigma}:parameter) ->
+    | ({mean=rf;st_dev=sigma}:parameter) ->
+      let t = Time.diff expiry date0 |> Span.to_day in 
       match state with
-      | s0 ->
-        let time_span = (Time.diff expiry date0 |> Span.to_day) /. 365.0 in
-        let dd0 = (d0 param state time_span |> n0) in
-        let a = (s0 -. strike) *. dd0 in
-        let b = s0 *. sigma /. sqrt (2.0 *. pi) *. exp ((-. dd0 ** 2.0) /. 2.0) in
-        (a +. b) *. exp (time_span *. mu)
-        
-        
-
-
+      | (s:float) -> s(*bachelier_call rf t s sigma strike*)
   
+
+    
   let get_closed_form payoff =
     let open Payoff_function in
     match payoff with

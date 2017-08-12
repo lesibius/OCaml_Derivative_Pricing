@@ -1,6 +1,11 @@
 #include <math.h>
 #include "closedform.h"
 
+#include <caml/mlvalues.h>
+#include <caml/memory.h>
+#include <caml/alloc.h>
+#include <caml/custom.h>
+
 
 double N0(double value)
 {
@@ -33,8 +38,19 @@ double bachelier_call(double rf, double t, double s, double sigma, double k)
   return(D*(A+B));
 }
 
-
-double bachelier_put()
+CAMLprim value caml_bachelier_call(value rf, value t, value s, value sigma, value k)
 {
-  return(2);
+  value RF,T,S,SIGMA,K;
+  double result;
+  
+  RF = Double_val(rf);
+  T = Double_val(t);
+  S = Double_val(s);
+  SIGMA = Double_val(sigma);
+  K = Double_val(k);
+
+  result = bachelier_call(RF,T,S,SIGMA,K);
+
+  return caml_copy_double(result);
+  
 }
