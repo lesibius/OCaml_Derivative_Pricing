@@ -10,6 +10,9 @@ core.docdir/index.html:
 math_util.cmx: math_util.ml math_util.mli
 	$(OCB) $(OCB_FLAGS)
 
+cstub_test: c_test.c closedform.c closedform.h
+	gcc $^ -o $@ -lm
+
 clean:
 	$(OCB) -clean
 
