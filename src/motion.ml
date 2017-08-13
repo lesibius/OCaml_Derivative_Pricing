@@ -69,28 +69,30 @@ module Bachelier : Motion_intf = struct
     |{mean=mu;st_dev=sigma} ->
       state *. mu *. dt +. sigma *. dw *. (sqrt dt)
 
-  let d0 s0 sigma_bar strike rf deltat =
-    ((s0 *. exp (rf *. deltat) -. strike)) /. (s0 *. sigma_bar *. exp (rf *. deltat))
-
-
-  (*
-  let n0 x = (1.0 +. erf (x /. sqrt 2.0)) /. 2.0
-  *)
-
-  external bachelier_call: float -> float -> float -> float -> float -> int = "caml_bachelier_call"
+  external bachelier_call: float -> float -> float -> float -> float -> float = "caml_bachelier_call"
+  external bachelier_put: float -> float -> float -> float -> float -> float = "caml_bachelier_put"
+    external bachelier_forward: float -> float -> float -> float = "caml_bachelier_forward"
     
 
-  let call_price expiry strike param (state:state) date0 =
+  let vanilla_price expiry strike f param (state:state) date0=
     match param with
     | ({mean=rf;st_dev=sigma}:parameter) ->
-      let t = Time.diff expiry date0 |> Span.to_day in 
+      let t = (Time.diff expiry date0 |> Span.to_day) /. 360.0 in 
       match state with
-            | (s:float) -> s(*bachelier_call rf t s sigma strike*)
+            | (s:float) -> f rf s sigma t strike
     
   let get_closed_form payoff =
     let open Payoff_function in
     match payoff with
-    | EUROPEAN_CALL (expiry,strike,_) -> Some (call_price expiry strike)
+    | EUROPEAN_CALL (expiry,strike,_) -> Some (vanilla_price expiry strike bachelier_call)
+    | EUROPEAN_PUT (expiry,strike,_) -> Some (vanilla_price expiry strike bachelier_put)
+    | FORWARD (expiry,_,_) ->
+      Some (fun param state date0 ->
+          match param with
+          |({mean=rf;st_dev=sigma}:parameter) ->
+            let t = (Time.diff expiry date0 |> Span.to_day) /. 360.0 in
+            match state with
+            | (s:float) -> bachelier_forward rf s t)
     | _ -> None
 
 

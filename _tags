@@ -1,4 +1,9 @@
-true:package(core,ctypes.foreign)
-<*.ml>:     annot
-<*.byte>:   linkdep(closedform.o),custom
-<*.native>: linkdep(closedform.o)
+<*/*.ml{i,}>:	linkdep(src/closedform.o),custom,package(core,core_extended)
+<*/*.cm{x,}{o,a,i}>:	linkdep(src/closedform.o),custom,package(core,core_extended)
+<*/*.byte>:linkdep(src/closedform.o),custom,package(core,core_extended)
+<*.native>:	linkdep(src/closedform.o)
+
+
+
+
+
