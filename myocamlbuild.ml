@@ -1,7 +1,10 @@
 open Ocamlbuild_plugin;;
+open Command;;
 
-dispatch 
-    ( function 
-    | After_rules -> pdep ["link"] "linkdep" (fun param -> [param])
+let () = dispatch begin function
+    | Before_options ->
+      Options.use_ocamlfind := true
+    | After_options -> pdep  ["link"] "linkdep" (fun param -> [param])
     | _           -> ()
-    )
+  end
+
